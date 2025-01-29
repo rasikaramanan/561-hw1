@@ -68,6 +68,8 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 init_pop = create_init_population(4, locations)
+print("INITIAL POPULATION:")
 [print(x) for x in init_pop]
 rank_list = make_rank_list(init_pop)
+print("RANK LIST:")
 [print(x) for x in rank_list]
