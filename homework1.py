@@ -63,8 +63,33 @@ def make_rank_list(init_pop):
         bisect.insort(rank_list, entry)
     return rank_list
     
-def create_mating_pool(population, ranklist):
-    pass
+def create_mating_pool(population, rank_list):
+    # Invert fitness scores (lower is better, so higher probability)
+    inv_fitness_rank_list = []
+    sum_inv_fitness = 0.0
+
+    for dist, index in rank_list:
+        inv_fit = 1.0 / dist
+        inv_fitness_rank_list.append((inv_fit, index))
+        sum_inv_fitness += inv_fit
+    
+    parent_indices = []
+    
+    while len(parent_indices) < 2: #SELECT MATING POOL OF SIZE = 2
+        rand_num = random.uniform(0, sum_inv_fitness)
+        #print("random number is: ", rand_num)
+        sum_pop = 0
+        for score, index in inv_fitness_rank_list:
+            sum_pop += score
+            if rand_num < sum_pop:
+                if index not in parent_indices: # ensures duplicate parents do not occur
+                    parent_indices.append(index)
+                    print("PARENT ADDED: ", score, index)
+                break 
+    print("parent indices selected: ", parent_indices)
+    population_dict = {index: route for index, route in enumerate(population)}
+    mating_pool = [population_dict[index] for index in parent_indices]
+    return mating_pool
 
 with open("input.txt", "r") as input:
     num_cities = int(input.readline().strip())
@@ -73,9 +98,15 @@ with open("input.txt", "r") as input:
         city_location = [int(coord) for coord in line.split()]
         locations.append(city_location)
 
-init_pop = create_init_population(4, locations)
+init_pop = create_init_population(50, locations)
 print("INITIAL POPULATION:")
 [print(x) for x in init_pop]
+
 rank_list = make_rank_list(init_pop)
 print("RANK LIST:")
 [print(x) for x in rank_list]
+
+mating_pool = create_mating_pool(init_pop, rank_list)
+print("MATING POOL:")
+[print(x) for x in mating_pool]
+
