@@ -14,16 +14,22 @@ def create_init_population(size, cities):
     
     for _ in range(size):
         city_order = city_indices.copy()
-
+        print("in loop, city_order: ", city_order)
         while True: # ensures no duplicate paths
             random.seed()  # Reseed with a system-generated random value
             random.shuffle(city_order)
+            print("in while loop, dict contents before addition attempt: ", orders_tried)
             if tuple(city_order) not in orders_tried:
                 orders_tried[tuple(city_order)] = None    
+                print("in while loop, dict contents after successful addition: ", orders_tried)
                 break
-            
+            print("in while loop, addition of following failed: ", city_order)
+
+        print("after while loop, city order: ", city_order)
         city_order.append(city_order[0]) # add starting city to end of list
+        print("city order after appending starting city: ", city_order)
         path = [cities[j] for j in city_order] # populate w cities in city_order
+        print("path created: ", path)
         paths.append(path)
     
     return paths
