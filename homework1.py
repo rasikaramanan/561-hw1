@@ -1,6 +1,7 @@
 import random
 import math 
 import bisect
+import warnings 
 
 def create_init_population(size, cities):
     """ 
@@ -8,6 +9,11 @@ def create_init_population(size, cities):
     cities = list of city locations parsed from input
     returns: list of paths (roundtrip -- ends with starting city) of length = size
     """
+
+    if size > math.factorial(len(cities)):
+        warnings.warn(f"Given size of {size} is greater than the number of permutations possible for {len(cities)} cities. Setting size to the max allowable value, {math.factorial(len(cities))}.")
+        size = math.factorial(len(cities))
+        
     paths = []
     orders_tried = {}
     city_indices = list(range(len(cities)))
