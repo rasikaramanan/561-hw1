@@ -10,7 +10,7 @@ def create_init_population(size, cities):
     """
     paths = []
     orders_tried = {}
-    city_indices = list(range(len(cities) - 1))
+    city_indices = list(range(len(cities)))
     
     for _ in range(size):
         city_order = city_indices.copy()
