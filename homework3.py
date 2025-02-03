@@ -97,12 +97,6 @@ def crossover(parent1, parent2, start_index, end_index):
     need to know -- content from subarr2 that is not in subarr1
 
     """
-    
-    # subarr1 = parent1[start_index:end_index + 1]
-    # subarr2 = parent2[start_index:end_index + 1]
-    # parent2[start_index:end_index + 1] = subarr1
-    # print(parent2)
-
     n = len(parent1)
     child = [None] * n
     visited = {}
@@ -110,29 +104,44 @@ def crossover(parent1, parent2, start_index, end_index):
     for i in range(start_index, end_index + 1):
         child[i] = parent1[i]
         visited[tuple(parent1[i])] = True
+    #visited now contains parent1 cities from index subarr range
 
     missing_vals = [city for city in parent1 if tuple(city) not in visited]
     missing_iter = iter(missing_vals)
-
-    for i in range(n):
+    print("missing_vals: ", missing_vals)
+    print("visited, before loop: ", visited)
+    for i in range(n - 1): # keeps the last index of child blank
+        print("child: ", child)
         if child[i] is None:
             city_tuple = tuple(parent2[i])
+            print("city_tuple: ", city_tuple)
             if city_tuple not in visited:
+                print("city_tuple not in visited")
                 child[i] = parent2[i]
                 visited[city_tuple] = True
+                
             else:
-                child[i] = next(missing_iter)
+                while True:
+                    next_city = next(missing_iter)
+                    print("city_tuple in visited, next_city is: ", next_city)
+
+                    if tuple(next_city) not in visited:
+                        child[i] = next_city
+                        visited[tuple(next_city)] = True
+                        break
+        print("visited, end of loop iter: ", visited)
 
     child[-1] = child[0]
 
     return child
 
 def make_output(path):
-    dist = calc_path_distance(path)
-    string_list = map(lambda lst: " ".join(map(str, lst)), path)
+    dist = str(calc_path_distance(path))
+    string_list = list(map(lambda lst: " ".join(map(str, lst)), path))
     with open("output.txt", "w") as file:
-        file.write(str(dist) + "\n")
-        file.writelines(city + "\n" for city in string_list)
+        file.write((str(dist) + "\n"))  # Convert string to bytes
+        file.writelines((city + "\n") for city in string_list[:-1])
+        file.write(string_list[-1])
 
 with open("input.txt", "r") as input:
     num_cities = int(input.readline().strip())
@@ -150,11 +159,11 @@ rank_list = make_rank_list(init_pop)
 # [print(x) for x in rank_list]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
-# print("MATING POOL:")
-# [print(x) for x in mating_pool]
+print("MATING POOL:")
+[print(x) for x in mating_pool]
 
 child = crossover(mating_pool[0], mating_pool[1], 1, 2)
-# print("CHILD: ")
-# print(child)
+print("CHILD: ")
+print(child)
 
 make_output(child)
