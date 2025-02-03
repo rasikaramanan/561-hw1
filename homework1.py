@@ -84,12 +84,55 @@ def create_mating_pool(population, rank_list):
             if rand_num < sum_pop:
                 if index not in parent_indices: # ensures duplicate parents do not occur
                     parent_indices.append(index)
-                    print("PARENT ADDED: ", score, index)
+                    # print("PARENT ADDED: ", score, index)
                 break 
-    print("parent indices selected: ", parent_indices)
+    # print("parent indices selected: ", parent_indices)
     population_dict = {index: route for index, route in enumerate(population)}
     mating_pool = [population_dict[index] for index in parent_indices]
     return mating_pool
+
+def crossover(parent1, parent2, start_index, end_index):
+    """ 
+    need to know -- indices of subarr1 containing data that is not in subarr2
+    need to know -- content from subarr2 that is not in subarr1
+
+    """
+    
+    # subarr1 = parent1[start_index:end_index + 1]
+    # subarr2 = parent2[start_index:end_index + 1]
+    # parent2[start_index:end_index + 1] = subarr1
+    # print(parent2)
+
+    n = len(parent1)
+    child = [None] * n
+    visited = {}
+
+    for i in range(start_index, end_index + 1):
+        child[i] = parent1[i]
+        visited[tuple(parent1[i])] = True
+
+    missing_vals = [city for city in parent1 if tuple(city) not in visited]
+    missing_iter = iter(missing_vals)
+
+    for i in range(n):
+        if child[i] is None:
+            city_tuple = tuple(parent2[i])
+            if city_tuple not in visited:
+                child[i] = parent2[i]
+                visited[city_tuple] = True
+            else:
+                child[i] = next(missing_iter)
+
+    child[-1] = child[0]
+
+    return child
+
+def make_output(path):
+    dist = calc_path_distance(path)
+    string_list = map(lambda lst: " ".join(map(str, lst)), path)
+    with open("output.txt", "w") as file:
+        file.write(str(dist) + "\n")
+        file.writelines(city + "\n" for city in string_list)
 
 with open("input.txt", "r") as input:
     num_cities = int(input.readline().strip())
@@ -99,14 +142,19 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 init_pop = create_init_population(50, locations)
-print("INITIAL POPULATION:")
-[print(x) for x in init_pop]
+# print("INITIAL POPULATION:")
+# [print(x) for x in init_pop]
 
 rank_list = make_rank_list(init_pop)
-print("RANK LIST:")
-[print(x) for x in rank_list]
+# print("RANK LIST:")
+# [print(x) for x in rank_list]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
-print("MATING POOL:")
-[print(x) for x in mating_pool]
+# print("MATING POOL:")
+# [print(x) for x in mating_pool]
 
+child = crossover(mating_pool[0], mating_pool[1], 1, 2)
+# print("CHILD: ")
+# print(child)
+
+make_output(child)
