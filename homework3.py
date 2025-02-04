@@ -64,6 +64,23 @@ def make_rank_list(init_pop):
     return rank_list
     
 def create_mating_pool(population, rank_list):
+
+    # ensure the top10percent is an even num
+    top10percent = len(rank_list) // 10
+    top10percent = top10percent - 1 if (len(rank_list) // 10) % 2 == 1 else top10percent
+
+    # 40% of population to be selected for mating from roulette wheel
+    mp_from_roulette_wheel = len(rank_list) // 10 * 4
+
+
+    # store the top 10 percent of population in top10_ranked, rest stays in rank_list
+    top10_ranked, rank_list = rank_list[:top10percent], rank_list[top10percent:]
+
+    population_dict = {index: route for index, route in enumerate(population)}
+
+    # mating_pool is a list of paths, init with top10_ranked
+    mating_pool = [population_dict[index] for (_, index) in top10_ranked]
+
     # Invert fitness scores (lower is better, so higher probability)
     inv_fitness_rank_list = []
     sum_inv_fitness = 0.0
@@ -75,7 +92,7 @@ def create_mating_pool(population, rank_list):
     
     parent_indices = []
     
-    while len(parent_indices) < 2: #SELECT MATING POOL OF SIZE = 2
+    while len(parent_indices) < mp_from_roulette_wheel: #SELECT MATING POOL OF SIZE = 2
         rand_num = random.uniform(0, sum_inv_fitness)
         #print("random number is: ", rand_num)
         sum_pop = 0
@@ -88,8 +105,15 @@ def create_mating_pool(population, rank_list):
                 break 
     # print("parent indices selected: ", parent_indices)
     population_dict = {index: route for index, route in enumerate(population)}
-    mating_pool = [population_dict[index] for index in parent_indices]
+    mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
+
+def get_rand_pairs(mating_pool):
+    if len(mating_pool) % 2 == 1:
+        mating_pool.pop()
+
+    random.shuffle(mating_pool)
+    return list(zip(mating_pool[::2], mating_pool[1::2]))
 
 def crossover(parent1, parent2, start_index, end_index):
     """ 
@@ -135,6 +159,20 @@ def crossover(parent1, parent2, start_index, end_index):
 
     return child
 
+
+def make_super_child(parents_list):
+    if len(parents_list) == 1:
+        return crossover(parents_list[0][0], 
+                         parents_list[0][1], 
+                         1, 2)
+    children = []
+    for parent1, parent2 in parents_list:
+        child = crossover(parent1, parent2, 1, 2)
+        children.append(child)
+    if len(children) > 1 and len(children) % 2 == 1: 
+        children.pop()
+    return make_super_child(get_rand_pairs(children))
+
 def make_output(path):
     dist = str(calc_path_distance(path))
     string_list = list(map(lambda lst: " ".join(map(str, lst)), path))
@@ -150,7 +188,7 @@ with open("input.txt", "r") as input:
         city_location = [int(coord) for coord in line.split()]
         locations.append(city_location)
 
-init_pop = create_init_population(50, locations)
+init_pop = create_init_population(31, locations)
 # print("INITIAL POPULATION:")
 # [print(x) for x in init_pop]
 
@@ -162,8 +200,8 @@ mating_pool = create_mating_pool(init_pop, rank_list)
 print("MATING POOL:")
 [print(x) for x in mating_pool]
 
-child = crossover(mating_pool[0], mating_pool[1], 1, 2)
-print("CHILD: ")
-print(child)
+super_child = make_super_child(get_rand_pairs(mating_pool))
 
-make_output(child)
+print("CHILD:\n", super_child)
+make_output(super_child)
+
