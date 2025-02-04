@@ -11,7 +11,7 @@ def create_init_population(size, cities):
     """
 
     if size > math.factorial(len(cities)):
-        warnings.warn(f"Given size of {size} is greater than the number of permutations possible for {len(cities)} cities. Setting size to the max allowable value, {math.factorial(len(cities))}.")
+        warnings.warn(f"Given initial population size of {size} is greater than the number of permutations possible for {len(cities)} cities. Setting initial population size to the max allowable value, {math.factorial(len(cities))}.")
         size = math.factorial(len(cities))
         
     paths = []
