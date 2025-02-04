@@ -139,7 +139,7 @@ def make_output(path):
     dist = str(calc_path_distance(path))
     string_list = list(map(lambda lst: " ".join(map(str, lst)), path))
     with open("output.txt", "w") as file:
-        file.write((str(dist) + "\n"))  # Convert string to bytes
+        file.write(dist + "\n")  
         file.writelines((city + "\n") for city in string_list[:-1])
         file.write(string_list[-1])
 
