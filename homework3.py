@@ -160,18 +160,18 @@ def crossover(parent1, parent2, start_index, end_index):
     return child
 
 
-def make_super_child(parents_list):
+def make_super_child(parents_list, start_index, end_index):
     if len(parents_list) == 1:
         return crossover(parents_list[0][0], 
                          parents_list[0][1], 
-                         1, 2)
+                         start_index, end_index)
     children = []
     for parent1, parent2 in parents_list:
-        child = crossover(parent1, parent2, 1, 2)
+        child = crossover(parent1, parent2, start_index, end_index)
         children.append(child)
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
-    return make_super_child(get_rand_pairs(children))
+    return make_super_child(get_rand_pairs(children), start_index, end_index)
 
 def make_output(path):
     dist = str(calc_path_distance(path))
@@ -188,7 +188,16 @@ with open("input.txt", "r") as input:
         city_location = [int(coord) for coord in line.split()]
         locations.append(city_location)
 
-init_pop = create_init_population(31, locations)
+
+init_pop_size = 2000 if math.factorial(num_cities) >= 2000 else math.factorial(num_cities)
+print("INITIAL POPULATION SIZE: ", init_pop_size)
+
+# start 25% of the way through the array
+start_index = num_cities // 4 if num_cities > 3 else 1
+#end 75% of the way through the array
+end_index = start_index * 2 if num_cities < 5 else start_index * 3
+
+init_pop = create_init_population(init_pop_size, locations)
 # print("INITIAL POPULATION:")
 # [print(x) for x in init_pop]
 
@@ -197,10 +206,10 @@ rank_list = make_rank_list(init_pop)
 # [print(x) for x in rank_list]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
-print("MATING POOL:")
-[print(x) for x in mating_pool]
+# print("MATING POOL:")
+# [print(x) for x in mating_pool]
 
-super_child = make_super_child(get_rand_pairs(mating_pool))
+super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_index)
 
 print("CHILD:\n", super_child)
 make_output(super_child)
