@@ -143,16 +143,36 @@ def crossover(parent1, parent2, start, end):
     child.append(child[0])
     return child
 
+def mutate(path, generation, max_generations):
+    pass
+
+def two_opt(path):
+    """Applies the 2-opt local optimization heuristic to improve a given path."""
+    curr_dist = calc_path_distance(path)
+    curr_path = path.copy()
+    
+    for i in range(1, len(path) - 2):  
+        for j in range(i + 1, len(path) - 1):  
+            # Swap the segment between i and j
+            new_path = curr_path[:i] + curr_path[i:j][::-1] + curr_path[j:]
+            
+            new_dist = calc_path_distance(new_path)
+            if new_dist < curr_dist:
+                curr_path, curr_dist = new_path, new_dist  # Keep improved path
+    
+    return curr_path
 
 def make_super_child(parents_list, start_index, end_index):
-    if len(parents_list) == 1:
-        return crossover(parents_list[0][0], 
+    if len(parents_list) == 1: # basecase 
+        crossed = crossover(parents_list[0][0], 
                          parents_list[0][1], 
                          start_index, end_index)
+        return two_opt(crossed)
+    
     children = []
     for parent1, parent2 in parents_list:
-        child = crossover(parent1, parent2, start_index, end_index)
-        children.append(child)
+        crossed = crossover(parent1, parent2, start_index, end_index)
+        children.append(two_opt(crossed))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
     return make_super_child(get_rand_pairs(children), start_index, end_index)
@@ -173,7 +193,7 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 
-init_pop_size = 2000 if math.factorial(num_cities) >= 2000 else math.factorial(num_cities)
+init_pop_size = 500 if math.factorial(num_cities) >= 500 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
