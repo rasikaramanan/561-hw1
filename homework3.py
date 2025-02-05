@@ -3,6 +3,7 @@ import math
 import bisect
 import warnings 
 import numpy as np
+from multiprocessing import Pool
 
 def create_init_population(size, cities):
     """ 
@@ -40,13 +41,12 @@ def create_init_population(size, cities):
         paths.append(path)
     
     return paths
-    
+
 
 def calc_path_distance(path):
     path_arr = np.array(path)  
     
-    if np.array_equal(path_arr[0], path_arr[-1]):
-        path_arr = path_arr[:-1]
+    path_arr = path_arr[:-1]
     
     shifted_path = np.roll(path_arr, shift=-1, axis=0)  # Shifted version to compute distances
     distances = np.linalg.norm(shifted_path - path_arr, axis=1)  # Vectorized Euclidean distance
@@ -60,6 +60,7 @@ def make_rank_list(init_pop):
         # will automatically sort by entry's val at index 0
         bisect.insort(rank_list, entry)
     return rank_list
+
 
 def get_top_10_percent(num_pop):
     top10percent = num_pop // 10 
@@ -150,16 +151,22 @@ def two_opt(path):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_dist = calc_path_distance(path)
     curr_path = path.copy()
-    
+    #print("in two opt")
+   # print("orig path", curr_path)
     for i in range(1, len(path) - 2):  
-        for j in range(i + 1, len(path) - 1):  
+        improved = False
+        for j in range(i + 2, len(path)):  
             # Swap the segment between i and j
             new_path = curr_path[:i] + curr_path[i:j][::-1] + curr_path[j:]
-            
+            #print("new path:", new_path)
             new_dist = calc_path_distance(new_path)
             if new_dist < curr_dist:
                 curr_path, curr_dist = new_path, new_dist  # Keep improved path
-    
+                improved = True
+                #print("new path is an improvement!")
+                break
+        if improved:
+            break
     return curr_path
 
 def make_super_child(parents_list, start_index, end_index):
@@ -193,7 +200,7 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 
-init_pop_size = 500 if math.factorial(num_cities) >= 500 else math.factorial(num_cities)
+init_pop_size = 2000 if math.factorial(num_cities) >= 2000 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
