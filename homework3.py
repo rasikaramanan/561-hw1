@@ -132,28 +132,28 @@ def crossover(parent1, parent2, start_index, end_index):
 
     missing_vals = [city for city in parent1 if tuple(city) not in visited]
     missing_iter = iter(missing_vals)
-    print("missing_vals: ", missing_vals)
-    print("visited, before loop: ", visited)
+    #print("missing_vals: ", missing_vals)
+    #print("visited, before loop: ", visited)
     for i in range(n - 1): # keeps the last index of child blank
-        print("child: ", child)
+        #print("child: ", child)
         if child[i] is None:
             city_tuple = tuple(parent2[i])
-            print("city_tuple: ", city_tuple)
+            #print("city_tuple: ", city_tuple)
             if city_tuple not in visited:
-                print("city_tuple not in visited")
+                #print("city_tuple not in visited")
                 child[i] = parent2[i]
                 visited[city_tuple] = True
                 
             else:
                 while True:
                     next_city = next(missing_iter)
-                    print("city_tuple in visited, next_city is: ", next_city)
+                    #print("city_tuple in visited, next_city is: ", next_city)
 
                     if tuple(next_city) not in visited:
                         child[i] = next_city
                         visited[tuple(next_city)] = True
                         break
-        print("visited, end of loop iter: ", visited)
+        #print("visited, end of loop iter: ", visited)
 
     child[-1] = child[0]
 
