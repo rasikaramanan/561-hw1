@@ -2,6 +2,7 @@ import random
 import math 
 import bisect
 import warnings 
+import numpy as np
 
 def create_init_population(size, cities):
     """ 
@@ -40,20 +41,17 @@ def create_init_population(size, cities):
     
     return paths
     
-def calc_path_distance(path):
-    total_dist = 0.0
 
-    # loop calcs dist between two cities
-    for i in range(len(path) - 1): 
-        city1 = path[i]
-        city2 = path[i + 1]
-        dist = math.sqrt(
-            (city2[0] - city1[0])**2 + 
-            (city2[1] - city1[1])**2 + 
-            (city2[2] - city1[2])**2 
-        )
-        total_dist += dist
-    return total_dist
+def calc_path_distance(path):
+    path_arr = np.array(path)  
+    
+    if np.array_equal(path_arr[0], path_arr[-1]):
+        path_arr = path_arr[:-1]
+    
+    shifted_path = np.roll(path_arr, shift=-1, axis=0)  # Shifted version to compute distances
+    distances = np.linalg.norm(shifted_path - path_arr, axis=1)  # Vectorized Euclidean distance
+    
+    return np.sum(distances)
 
 def make_rank_list(init_pop):
     rank_list = []
