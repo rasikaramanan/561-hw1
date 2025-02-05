@@ -125,48 +125,22 @@ def get_rand_pairs(mating_pool):
     random.shuffle(mating_pool)
     return list(zip(mating_pool[::2], mating_pool[1::2]))
 
-def crossover(parent1, parent2, start_index, end_index):
-    """ 
-    need to know -- indices of subarr1 containing data that is not in subarr2
-    need to know -- content from subarr2 that is not in subarr1
+def crossover(parent1, parent2, start, end):
+    size = len(parent1) - 1 # exclude last city 
+    child = [None] * size
+    start, end = sorted(random.sample(range(size), 2)) 
+    child[start:end] = parent1[start:end]
 
-    """
-    n = len(parent1)
-    child = [None] * n
-    visited = {}
-
-    for i in range(start_index, end_index + 1):
-        child[i] = parent1[i]
-        visited[tuple(parent1[i])] = True
-    #visited now contains parent1 cities from index subarr range
-
-    missing_vals = [city for city in parent1 if tuple(city) not in visited]
-    missing_iter = iter(missing_vals)
+    remaining_cities = [city for city in parent2 if city not in child]
+    insert_pos = 0
     #print("missing_vals: ", missing_vals)
     #print("visited, before loop: ", visited)
-    for i in range(n - 1): # keeps the last index of child blank
-        #print("child: ", child)
+    for i in range(size): # keeps the last index of child blank
         if child[i] is None:
-            city_tuple = tuple(parent2[i])
-            #print("city_tuple: ", city_tuple)
-            if city_tuple not in visited:
-                #print("city_tuple not in visited")
-                child[i] = parent2[i]
-                visited[city_tuple] = True
-                
-            else:
-                while True:
-                    next_city = next(missing_iter)
-                    #print("city_tuple in visited, next_city is: ", next_city)
+                child[i] = remaining_cities[insert_pos]
+                insert_pos += 1
 
-                    if tuple(next_city) not in visited:
-                        child[i] = next_city
-                        visited[tuple(next_city)] = True
-                        break
-        #print("visited, end of loop iter: ", visited)
-
-    child[-1] = child[0]
-
+    child.append(child[0])
     return child
 
 
