@@ -62,16 +62,28 @@ def make_rank_list(init_pop):
         # will automatically sort by entry's val at index 0
         bisect.insort(rank_list, entry)
     return rank_list
-    
+
+def get_top_10_percent(num_pop):
+    top10percent = num_pop // 10 
+    if top10percent == 0: # 3 cities in init pop
+        top10percent += 2
+    elif top10percent % 2 == 1:
+        top10percent += 1
+    return top10percent
+
+def get_roulette_wheel_percent(num_pop):
+    num_mp = num_pop // 10 * 4
+    if num_mp == 0:
+        num_mp = 2
+    return num_mp
+
 def create_mating_pool(population, rank_list):
 
     # ensure the top10percent is an even num
-    top10percent = len(rank_list) // 10
-    top10percent = top10percent - 1 if (len(rank_list) // 10) % 2 == 1 else top10percent
-
+    top10percent = get_top_10_percent(len(rank_list)) 
+    
     # 40% of population to be selected for mating from roulette wheel
-    mp_from_roulette_wheel = len(rank_list) // 10 * 4
-
+    mp_from_roulette_wheel = get_roulette_wheel_percent(len(rank_list))
 
     # store the top 10 percent of population in top10_ranked, rest stays in rank_list
     top10_ranked, rank_list = rank_list[:top10percent], rank_list[top10percent:]
