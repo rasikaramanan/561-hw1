@@ -245,7 +245,7 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 
-init_pop_size = 2000 if math.factorial(num_cities) >= 2000 else math.factorial(num_cities)
+init_pop_size = 3000 if math.factorial(num_cities) >= 3000 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
