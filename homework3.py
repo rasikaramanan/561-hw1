@@ -127,6 +127,8 @@ def get_rand_pairs(mating_pool):
     return list(zip(mating_pool[::2], mating_pool[1::2]))
 
 def crossover(parent1, parent2, start, end):
+    if parent1 == parent2:
+        return parent1
     size = len(parent1) - 1 # exclude last city 
     child = [None] * size
     start, end = sorted(random.sample(range(size), 2)) 
