@@ -250,9 +250,8 @@ super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_ind
 make_output(super_child)
 
 def print_profiling_results():
-    print("\n=== Function Profiling Results ===")
     total_runtime = sum(data["total_time"] for data in profile_data.values())
-
+    print(f"\n=== Total Runtime: {total_runtime:.4f} seconds ===")
     for func, data in sorted(profile_data.items(), key=lambda x: x[1]["total_time"], reverse=True):
         calls = data["calls"]
         total_time = data["total_time"]
