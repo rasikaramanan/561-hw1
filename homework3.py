@@ -3,7 +3,6 @@ import math
 import bisect
 import warnings 
 import numpy as np
-from multiprocessing import Pool
 
 def create_init_population(size, cities):
     """ 
