@@ -3,8 +3,35 @@ import math
 import bisect
 import warnings 
 import numpy as np
-from multiprocessing import Pool
+import time
+import functools
 
+# Dictionary to store function call counts and total execution time
+profile_data = {}
+
+def profile(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+
+        elapsed_time = end_time - start_time
+        func_name = func.__name__
+
+        # Update profiling data
+        if func_name not in profile_data:
+            profile_data[func_name] = {"calls": 0, "total_time": 0.0}
+        
+        profile_data[func_name]["calls"] += 1
+        profile_data[func_name]["total_time"] += elapsed_time
+
+        return result
+
+    return wrapper
+
+
+@profile
 def create_init_population(size, cities):
     """ 
     size = size of population to create
@@ -43,6 +70,7 @@ def create_init_population(size, cities):
     return paths
 
 
+@profile
 def calc_path_distance(path):
     path_arr = np.array(path)  
     
@@ -53,6 +81,7 @@ def calc_path_distance(path):
     
     return np.sum(distances)
 
+@profile
 def make_rank_list(init_pop):
     rank_list = []
     for index, path in enumerate(init_pop):
@@ -62,6 +91,7 @@ def make_rank_list(init_pop):
     return rank_list
 
 
+@profile
 def get_top_10_percent(num_pop):
     top10percent = num_pop // 10 
     if top10percent == 0: # 3 cities in init pop
@@ -70,12 +100,14 @@ def get_top_10_percent(num_pop):
         top10percent += 1
     return top10percent
 
+@profile
 def get_roulette_wheel_percent(num_pop):
     num_mp = num_pop // 10 * 4
     if num_mp == 0:
         num_mp = 2
     return num_mp
 
+@profile
 def create_mating_pool(population, rank_list):
 
     # ensure the top10percent is an even num
@@ -119,6 +151,7 @@ def create_mating_pool(population, rank_list):
     mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
 
+@profile
 def get_rand_pairs(mating_pool):
     if len(mating_pool) % 2 == 1:
         mating_pool.pop()
@@ -126,6 +159,7 @@ def get_rand_pairs(mating_pool):
     random.shuffle(mating_pool)
     return list(zip(mating_pool[::2], mating_pool[1::2]))
 
+@profile
 def crossover(parent1, parent2, start, end):
 
     size = len(parent1) - 1 # exclude last city 
@@ -145,9 +179,11 @@ def crossover(parent1, parent2, start, end):
     child.append(child[0])
     return child
 
+@profile
 def mutate(path, generation, max_generations):
     pass
 
+@profile
 def two_opt(path, num_improvements = 50):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
@@ -177,6 +213,7 @@ def two_opt(path, num_improvements = 50):
 
     
             
+@profile
 def make_super_child(parents_list, start_index, end_index):
     if len(parents_list) == 1: # basecase 
         crossed = crossover(parents_list[0][0], 
@@ -233,3 +270,14 @@ super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_ind
 # print("CHILD:\n", super_child)
 make_output(super_child)
 
+def print_profiling_results():
+    print("\n=== Function Profiling Results ===")
+    total_runtime = sum(data["total_time"] for data in profile_data.values())
+
+    for func, data in sorted(profile_data.items(), key=lambda x: x[1]["total_time"], reverse=True):
+        calls = data["calls"]
+        total_time = data["total_time"]
+        percentage = (total_time / total_runtime) * 100 if total_runtime else 0
+        print(f"{func}: {calls} calls, {total_time:.4f} sec total, {percentage:.2f}% of runtime")
+
+print_profiling_results()
