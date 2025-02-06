@@ -49,22 +49,15 @@ def create_init_population(size, cities):
     
     for _ in range(size):
         city_order = city_indices.copy()
-        #print("in loop, city_order: ", city_order)
-        while True: # ensures no duplicate paths
+        while True: 
             random.seed()  # Reseed with a system-generated random value
             random.shuffle(city_order)
-            #print("in while loop, dict contents before addition attempt: ", orders_tried)
             if tuple(city_order) not in orders_tried:
                 orders_tried[tuple(city_order)] = None    
-                #print("in while loop, dict contents after successful addition: ", orders_tried)
                 break
-            #print("in while loop, addition of following failed: ", city_order)
 
-        #print("after while loop, city order: ", city_order)
         city_order.append(city_order[0]) # add starting city to end of list
-        #print("city order after appending starting city: ", city_order)
-        path = [cities[j] for j in city_order] # populate w cities in city_order
-        #print("path created: ", path)
+        path = [cities[j] for j in city_order] 
         paths.append(path)
     
     return paths
@@ -135,18 +128,15 @@ def create_mating_pool(population, rank_list):
     
     parent_indices = []
     
-    while len(parent_indices) < mp_from_roulette_wheel: #SELECT MATING POOL OF SIZE = 2
+    while len(parent_indices) < mp_from_roulette_wheel: 
         rand_num = random.uniform(0, sum_inv_fitness)
-        #print("random number is: ", rand_num)
         sum_pop = 0
         for score, index in inv_fitness_rank_list:
             sum_pop += score
             if rand_num < sum_pop:
                 if index not in parent_indices: # ensures duplicate parents do not occur
                     parent_indices.append(index)
-                    # print("PARENT ADDED: ", score, index)
                 break 
-    # print("parent indices selected: ", parent_indices)
     population_dict = {index: route for index, route in enumerate(population)}
     mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
@@ -169,8 +159,6 @@ def crossover(parent1, parent2, start, end):
 
     remaining_cities = [city for city in parent2 if city not in child]
     insert_pos = 0
-    #print("missing_vals: ", missing_vals)
-    #print("visited, before loop: ", visited)
     for i in range(size): # keeps the last index of child blank
         if child[i] is None:
                 child[i] = remaining_cities[insert_pos]
@@ -188,8 +176,7 @@ def two_opt(path, num_improvements = 50):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
     num_cities = len(path)
-    #print("in two opt")
-   # print("orig path", curr_path)
+
     imprvmnts_made = 0
     for segment_length in range(num_cities - 3, 1, -1):  # Start with largest swaps
         for i in range(1, num_cities - segment_length - 1):  # Skip first and last city
@@ -210,8 +197,6 @@ def two_opt(path, num_improvements = 50):
         if imprvmnts_made >= num_improvements:
             break
     return curr_path
-
-    
             
 @profile
 def make_super_child(parents_list, start_index, end_index):
@@ -250,24 +235,18 @@ print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
 start_index = num_cities // 4 if num_cities > 3 else 1
+
 #end 75% of the way through the array
 end_index = start_index * 2 if num_cities < 5 else start_index * 3
 
 init_pop = create_init_population(init_pop_size, locations)
-# print("INITIAL POPULATION:")
-# [print(x) for x in init_pop]
 
 rank_list = make_rank_list(init_pop)
-# print("RANK LIST:")
-# [print(x) for x in rank_list]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
-# print("MATING POOL:")
-# [print(x) for x in mating_pool]
 
 super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_index)
 
-# print("CHILD:\n", super_child)
 make_output(super_child)
 
 def print_profiling_results():
