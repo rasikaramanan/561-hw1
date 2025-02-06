@@ -147,28 +147,35 @@ def crossover(parent1, parent2, start, end):
 def mutate(path, generation, max_generations):
     pass
 
-def two_opt(path):
+def two_opt(path, num_improvements = 50):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
-    curr_dist = calc_path_distance(path)
     curr_path = path.copy()
+    num_cities = len(path)
     #print("in two opt")
    # print("orig path", curr_path)
-    for i in range(1, len(path) - 2):  
-        improved = False
-        for j in range(i + 2, len(path)):  
-            # Swap the segment between i and j
-            new_path = curr_path[:i] + curr_path[i:j][::-1] + curr_path[j:]
-            #print("new path:", new_path)
-            new_dist = calc_path_distance(new_path)
-            if new_dist < curr_dist:
-                curr_path, curr_dist = new_path, new_dist  # Keep improved path
-                improved = True
-                #print("new path is an improvement!")
+    imprvmnts_made = 0
+    for segment_length in range(num_cities - 3, 1, -1):  # Start with largest swaps
+        for i in range(1, num_cities - segment_length - 1):  # Skip first and last city
+            j = i + segment_length 
+
+            if j >= num_cities - 1:  # Prevent out-of-bounds errors
                 break
-        if improved:
+
+            prev_dist = np.linalg.norm(np.array(curr_path[i]) - np.array(curr_path[i-1])) + \
+                        np.linalg.norm(np.array(curr_path[j-1]) - np.array(curr_path[j]))
+            new_dist = np.linalg.norm(np.array(curr_path[j-1]) - np.array(curr_path[i-1])) + \
+                        np.linalg.norm(np.array(curr_path[i]) - np.array(curr_path[j]))
+            
+            if new_dist < prev_dist:
+                curr_path[i:j] = curr_path[i:j][::-1]
+                imprvmnts_made += 1
+                break #for a given segment length, only do one successful swap
+        if imprvmnts_made >= num_improvements:
             break
     return curr_path
 
+    
+            
 def make_super_child(parents_list, start_index, end_index):
     if len(parents_list) == 1: # basecase 
         crossed = crossover(parents_list[0][0], 
@@ -222,6 +229,6 @@ mating_pool = create_mating_pool(init_pop, rank_list)
 
 super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_index)
 
-print("CHILD:\n", super_child)
+# print("CHILD:\n", super_child)
 make_output(super_child)
 
