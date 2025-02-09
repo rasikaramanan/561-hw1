@@ -173,7 +173,7 @@ def mutate(path):
 
     return path
 
-def two_opt(path, num_improvements = 50):
+def two_opt(path, num_improvements = 200):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
     num_cities = len(path)
@@ -205,11 +205,13 @@ def make_super_child(parents_list, start_index, end_index):
                          parents_list[0][1], 
                          start_index, end_index)
         return two_opt(crossed)
+        #return two_opt(mutate(crossed))
     
     children = []
     for parent1, parent2 in parents_list:
         crossed = crossover(parent1, parent2, start_index, end_index)
         children.append(two_opt(crossed))
+        #children.append(two_opt(mutate(crossed)))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
     return make_super_child(get_rand_pairs(children), start_index, end_index)
@@ -231,7 +233,7 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 
-init_pop_size = 4000 if math.factorial(num_cities) >= 4000 else math.factorial(num_cities)
+init_pop_size = 1000 if math.factorial(num_cities) >= 1000 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
