@@ -117,7 +117,7 @@ def create_mating_pool(population, rank_list):
     # mating_pool is a list of paths, init with top10_ranked
     mating_pool = [population_dict[index] for (_, index) in top10_ranked]
 
-    parent_indices = tournament_selection(rank_list, mp_rest)
+    parent_indices = roulette_wheel_selection(rank_list, mp_rest)
     mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
 
@@ -244,12 +244,12 @@ def make_super_child(parents_list, start_index, end_index):
         crossed = crossover(parents_list[0][0], 
                          parents_list[0][1], 
                          start_index, end_index)
-        return mutate(two_opt(crossed))
+        return two_opt(crossed)
     
     children = []
     for parent1, parent2 in parents_list:
         crossed = crossover(parent1, parent2, start_index, end_index)
-        children.append(mutate(two_opt(crossed)))
+        children.append(two_opt(crossed))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
     return make_super_child(get_rand_pairs(children), start_index, end_index)
@@ -271,7 +271,7 @@ with open("input.txt", "r") as input:
         locations.append(city_location)
 
 
-init_pop_size = 3000 if math.factorial(num_cities) >= 3000 else math.factorial(num_cities)
+init_pop_size = 4000 if math.factorial(num_cities) >= 4000 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
 
 # start 25% of the way through the array
