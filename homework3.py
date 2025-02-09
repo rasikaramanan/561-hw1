@@ -62,7 +62,7 @@ def get_top_10_percent(num_pop):
         top10percent += 1
     return top10percent
 
-def get_roulette_wheel_percent(num_pop):
+def get_non_elite_percent(num_pop):
     num_mp = num_pop // 10 * 4
     if num_mp == 0:
         num_mp = 2
@@ -74,7 +74,7 @@ def create_mating_pool(population, rank_list):
     top10percent = get_top_10_percent(len(rank_list)) 
     
     # 40% of population to be selected for mating from roulette wheel
-    mp_from_roulette_wheel = get_roulette_wheel_percent(len(rank_list))
+    mp_rest = get_non_elite_percent(len(rank_list))
 
     # store the top 10 percent of population in top10_ranked, rest stays in rank_list
     top10_ranked, rank_list = rank_list[:top10percent], rank_list[top10percent:]
@@ -84,6 +84,12 @@ def create_mating_pool(population, rank_list):
     # mating_pool is a list of paths, init with top10_ranked
     mating_pool = [population_dict[index] for (_, index) in top10_ranked]
 
+    parent_indices = tournament_selection(rank_list, mp_rest)
+    mating_pool += [population_dict[index] for index in parent_indices]
+    return mating_pool
+
+@profile
+def roulette_wheel_selection(rank_list, num_to_select):
     # Invert fitness scores (lower is better, so higher probability)
     inv_fitness_rank_list = []
     sum_inv_fitness = 0.0
@@ -95,7 +101,7 @@ def create_mating_pool(population, rank_list):
     
     parent_indices = []
     
-    while len(parent_indices) < mp_from_roulette_wheel: 
+    while len(parent_indices) < num_to_select: 
         rand_num = random.uniform(0, sum_inv_fitness)
         sum_pop = 0
         for score, index in inv_fitness_rank_list:
@@ -103,10 +109,23 @@ def create_mating_pool(population, rank_list):
             if rand_num < sum_pop:
                 if index not in parent_indices: # ensures duplicate parents do not occur
                     parent_indices.append(index)
-                break 
-    population_dict = {index: route for index, route in enumerate(population)}
-    mating_pool += [population_dict[index] for index in parent_indices]
-    return mating_pool
+                break
+    return parent_indices     
+
+def tournament_selection(rank_list, num_to_select, tournament_size=3):
+    parent_indices = []
+
+    while len(parent_indices) < num_to_select:
+        # Randomly select tournament_size candidates from rank_list
+        tournament = random.sample(rank_list, tournament_size)
+        
+        # Choose the best (smallest dist) among them
+        best_candidate = min(tournament, key=lambda x: x[0])  
+        
+        if best_candidate[1] not in parent_indices:  # Avoid duplicates
+            parent_indices.append(best_candidate[1])
+
+    return parent_indices
 
 def get_rand_pairs(mating_pool):
     if len(mating_pool) % 2 == 1:
