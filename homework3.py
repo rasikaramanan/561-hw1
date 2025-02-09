@@ -188,8 +188,28 @@ def crossover(parent1, parent2, start, end):
     return child
 
 @profile
-def mutate(path, generation, max_generations):
-    pass
+def mutate(path):
+    num_cities = len(path) - 1 
+    if num_cities < 4:  
+        return path
+
+    # Randomly select two indices (excluding first and last)
+    i, j = sorted(random.sample(range(1, num_cities), 2))
+
+    # Calc orig dist
+    original_dist = np.linalg.norm(np.array(path[i]) - np.array(path[i-1])) + \
+                    np.linalg.norm(np.array(path[j]) - np.array(path[j+1]))
+
+    # Calc new dist
+    new_dist = np.linalg.norm(np.array(path[j]) - np.array(path[i-1])) + \
+               np.linalg.norm(np.array(path[i]) - np.array(path[j+1]))
+
+    # Swap only if it reduces dist
+    if new_dist < original_dist:
+        path[i], path[j] = path[j], path[i]
+        # print("IN MUTATE, path dist improved by: ", original_dist - new_dist)
+
+    return path
 
 @profile
 def two_opt(path, num_improvements = 50):
@@ -224,12 +244,12 @@ def make_super_child(parents_list, start_index, end_index):
         crossed = crossover(parents_list[0][0], 
                          parents_list[0][1], 
                          start_index, end_index)
-        return two_opt(crossed)
+        return mutate(two_opt(crossed))
     
     children = []
     for parent1, parent2 in parents_list:
         crossed = crossover(parent1, parent2, start_index, end_index)
-        children.append(two_opt(crossed))
+        children.append(mutate(two_opt(crossed)))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
     return make_super_child(get_rand_pairs(children), start_index, end_index)
