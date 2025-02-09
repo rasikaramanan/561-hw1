@@ -88,7 +88,6 @@ def create_mating_pool(population, rank_list):
     mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
 
-@profile
 def roulette_wheel_selection(rank_list, num_to_select):
     # Invert fitness scores (lower is better, so higher probability)
     inv_fitness_rank_list = []
