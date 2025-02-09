@@ -216,6 +216,7 @@ def make_super_child(parents_list, start_index, end_index):
 
 def make_output(path):
     dist = str(calc_path_distance(path))
+    print("PATH DIST FOR OUTPUT: ", dist)
     string_list = list(map(lambda lst: " ".join(map(str, lst)), path))
     with open("output.txt", "w") as file:
         file.write(dist + "\n")  
@@ -242,11 +243,19 @@ end_index = start_index * 2 if num_cities < 5 else start_index * 3
 init_pop = create_init_population(init_pop_size, locations)
 
 rank_list = make_rank_list(init_pop)
+print("SHORTEST PATH DIST FROM INIT POPULATION: ", rank_list[0][0])
+best_init_dist = rank_list[0][0]
+best_init_path = init_pop[rank_list[0][1]]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
 
 super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_index)
+dist_sc = calc_path_distance(super_child)
 
+print("SUPER CHILD PATH DIST: ", dist_sc)
+
+super_child = super_child if dist_sc < best_init_dist else best_init_path
+    
 make_output(super_child)
 
 def print_profiling_results():
