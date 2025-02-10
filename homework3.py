@@ -216,24 +216,24 @@ def two_opt(path, num_improvements = 300):
             
 @profile
 def make_super_child(parents_list):
-    if len(parents_list) == 1: # basecase 
-        crossed = crossover(parents_list[0][0], 
-                         parents_list[0][1])
-        return two_opt(crossed)
     
-    children = []
-    for parent1, parent2 in parents_list:
-        crossed = crossover(parent1, parent2)
-        children.append(two_opt(crossed))
-    if len(children) > 1 and len(children) % 2 == 1: 
-        children.pop()
-    # have an even num of children, can try tournament sel
-    num_pop = len(children)
-    if num_pop > 16:
-        children = create_mating_pool(children, make_rank_list(children), False)
-        print("NUM CHILDREN BF AND AFTER CREATING MATING POOL: ", num_pop, len(children))
+    while len(parents_list) > 1:
+        children = []
+        
+        children = [two_opt(crossover(p1, p2)) for p1, p2 in parents_list]
+        
+        if len(children) % 2 == 1:
+            children.pop()
+        
+        if len(children) > 16:
+            ranked_children = make_rank_list(children)
+            children = create_mating_pool(children, ranked_children, False)
+        
+        parents_list = get_rand_pairs(children)  
 
-    return make_super_child(get_rand_pairs(children))
+    #len(parents_list) == 1
+    return two_opt(crossover(parents_list[0][0], 
+                         parents_list[0][1]))  
 
 def make_output(path):
     dist = str(calc_path_distance(path))
