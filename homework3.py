@@ -192,7 +192,7 @@ def crossover(parent1, parent2):
     return child
 
 @profile
-def two_opt(path, num_improvements = 350):
+def two_opt(path, num_improvements = 300):
     curr_path = np.array(path)  # convert to numpy once 
     len_path = len(curr_path)
     imprvmnts_made = 0
@@ -203,13 +203,12 @@ def two_opt(path, num_improvements = 350):
             if j >= len_path - 1:
                 break
 
-            prev_dist = np.linalg.norm(curr_path[i] - curr_path[i-1]) + np.linalg.norm(curr_path[j-1] - curr_path[j])
-            new_dist = np.linalg.norm(curr_path[j-1] - curr_path[i-1]) + np.linalg.norm(curr_path[i] - curr_path[j])
-            
-            if new_dist < prev_dist:
-                curr_path[i:j] = curr_path[i:j][::-1]
-                imprvmnts_made += 1
+            prev_dist = np.sum((curr_path[i] - curr_path[i-1])**2) + np.sum((curr_path[j-1] - curr_path[j])**2)
+            new_dist = np.sum((curr_path[j-1] - curr_path[i-1])**2) + np.sum((curr_path[i] - curr_path[j])**2)
 
+            if new_dist < prev_dist:
+                curr_path[i:j] = np.flip(curr_path[i:j], axis=0)  # In-place NumPy swap
+                imprvmnts_made += 1
         if imprvmnts_made >= num_improvements:
             break
     return curr_path.tolist() 
@@ -227,8 +226,9 @@ def make_super_child(parents_list):
         
         if len(children) > 16:
             ranked_children = make_rank_list(children)
+            print("DIST of BEST CHILD: ", ranked_children[0][0])
             children = create_mating_pool(children, ranked_children, False)
-        
+            print("NUM CHILDREN BF and AF Tourney: ", len(ranked_children), len(children))
         parents_list = get_rand_pairs(children)  
 
     #len(parents_list) == 1
