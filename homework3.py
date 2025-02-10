@@ -1,9 +1,37 @@
 import random
 import math 
-import bisect
 import warnings 
 import numpy as np
+import time
+import functools
+import heapq
 
+# Dictionary to store function call counts and total execution time
+profile_data = {}
+
+def profile(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+
+        elapsed_time = end_time - start_time
+        func_name = func.__name__
+
+        # Update profiling data
+        if func_name not in profile_data:
+            profile_data[func_name] = {"calls": 0, "total_time": 0.0}
+        
+        profile_data[func_name]["calls"] += 1
+        profile_data[func_name]["total_time"] += elapsed_time
+
+        return result
+
+    return wrapper
+
+
+@profile
 def create_init_population(size, cities):
     """ 
     size = size of population to create
@@ -47,10 +75,10 @@ def calc_path_distance(path):
 
 def make_rank_list(init_pop):
     rank_list = []
-    for index, path in enumerate(init_pop):
-        entry = (calc_path_distance(path), index)
-        # will automatically sort by entry's val at index 0
-        bisect.insort(rank_list, entry)
+    dists = np.array([calc_path_distance(path) for path in init_pop])
+    rank_list = heapq.nsmallest(len(init_pop), 
+                                ((dist, index) for index, dist in enumerate(dists)), 
+                                key=lambda x: x[0])
     return rank_list
 
 
