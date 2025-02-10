@@ -175,21 +175,24 @@ def crossover(parent1, parent2, start, end):
 
     size = len(parent1) - 1 # exclude last city 
     child = [None] * size
-    start, end = sorted(random.sample(range(size), 2)) 
+    start = random.randint(0, size - 2)
+    end = random.randint(start + 1, size - 1)
     child[start:end] = parent1[start:end]
 
-    remaining_cities = [city for city in parent2 if city not in child]
+    # tuple(city) makes it O(1)
+    child_set = set(map(tuple, child[start:end]))
+    remaining_cities = [city for city in parent2 if tuple(city) not in child_set] 
     insert_pos = 0
     for i in range(size): # keeps the last index of child blank
         if child[i] is None:
-                child[i] = remaining_cities[insert_pos]
-                insert_pos += 1
+            child[i] = remaining_cities[insert_pos]
+            insert_pos += 1
 
     child.append(child[0])
     return child
 
 @profile
-def two_opt(path, num_improvements = 600):
+def two_opt(path, num_improvements = 300):
     curr_path = np.array(path)  # convert to numpy once 
     len_path = len(curr_path)
     imprvmnts_made = 0
