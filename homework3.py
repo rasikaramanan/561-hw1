@@ -95,7 +95,7 @@ def get_top_10_percent(num_pop):
 
 @profile
 def get_non_elite_percent(num_pop, initial_call):
-    num_mp = num_pop // 10 * 4 if initial_call else num_pop // 10 * 8
+    num_mp = num_pop // 10 * 5 if initial_call else num_pop // 10 * 8
     if num_mp == 0:
         num_mp = 2
     return num_mp
@@ -189,30 +189,6 @@ def crossover(parent1, parent2, start, end):
     return child
 
 @profile
-def mutate(path):
-    num_cities = len(path) - 1 
-    if num_cities < 4:  
-        return path
-
-    # Randomly select two indices (excluding first and last)
-    i, j = sorted(random.sample(range(1, num_cities), 2))
-
-    # Calc orig dist
-    original_dist = np.linalg.norm(np.array(path[i]) - np.array(path[i-1])) + \
-                    np.linalg.norm(np.array(path[j]) - np.array(path[j+1]))
-
-    # Calc new dist
-    new_dist = np.linalg.norm(np.array(path[j]) - np.array(path[i-1])) + \
-               np.linalg.norm(np.array(path[i]) - np.array(path[j+1]))
-
-    # Swap only if it reduces dist
-    if new_dist < original_dist:
-        path[i], path[j] = path[j], path[i]
-        # print("IN MUTATE, path dist improved by: ", original_dist - new_dist)
-
-    return path
-
-@profile
 def two_opt(path, num_improvements = 600):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
@@ -246,13 +222,11 @@ def make_super_child(parents_list, start_index, end_index):
                          parents_list[0][1], 
                          start_index, end_index)
         return two_opt(crossed)
-        #return two_opt(mutate(crossed))
     
     children = []
     for parent1, parent2 in parents_list:
         crossed = crossover(parent1, parent2, start_index, end_index)
         children.append(two_opt(crossed))
-        #children.append(two_opt(mutate(crossed)))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
     # have an even num of children, can try tournament sel
