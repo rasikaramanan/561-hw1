@@ -174,7 +174,7 @@ def mutate(path):
 
     return path
 
-def two_opt(path, num_improvements = 400):
+def two_opt(path, num_improvements = 600):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
     num_cities = len(path)
