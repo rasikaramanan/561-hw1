@@ -171,7 +171,7 @@ def get_rand_pairs(mating_pool):
     return list(zip(mating_pool[::2], mating_pool[1::2]))
 
 @profile
-def crossover(parent1, parent2, start, end):
+def crossover(parent1, parent2):
 
     size = len(parent1) - 1 # exclude last city 
     child = [None] * size
@@ -215,16 +215,15 @@ def two_opt(path, num_improvements = 300):
     return curr_path.tolist() 
             
 @profile
-def make_super_child(parents_list, start_index, end_index):
+def make_super_child(parents_list):
     if len(parents_list) == 1: # basecase 
         crossed = crossover(parents_list[0][0], 
-                         parents_list[0][1], 
-                         start_index, end_index)
+                         parents_list[0][1])
         return two_opt(crossed)
     
     children = []
     for parent1, parent2 in parents_list:
-        crossed = crossover(parent1, parent2, start_index, end_index)
+        crossed = crossover(parent1, parent2)
         children.append(two_opt(crossed))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
@@ -234,7 +233,7 @@ def make_super_child(parents_list, start_index, end_index):
         children = create_mating_pool(children, make_rank_list(children), False)
         print("NUM CHILDREN BF AND AFTER CREATING MATING POOL: ", num_pop, len(children))
 
-    return make_super_child(get_rand_pairs(children), start_index, end_index)
+    return make_super_child(get_rand_pairs(children))
 
 def make_output(path):
     dist = str(calc_path_distance(path))
@@ -271,7 +270,7 @@ best_init_path = init_pop[rank_list[0][1]]
 
 mating_pool = create_mating_pool(init_pop, rank_list)
 
-super_child = make_super_child(get_rand_pairs(mating_pool), start_index, end_index)
+super_child = make_super_child(get_rand_pairs(mating_pool))
 dist_sc = calc_path_distance(super_child)
 
 print("SUPER CHILD PATH DIST: ", dist_sc)
