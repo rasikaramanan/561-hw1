@@ -94,20 +94,20 @@ def get_top_10_percent(num_pop):
     return top10percent
 
 @profile
-def get_non_elite_percent(num_pop):
-    num_mp = num_pop // 10 * 4
+def get_non_elite_percent(num_pop, initial_call):
+    num_mp = num_pop // 10 * 4 if initial_call else num_pop // 10 * 8
     if num_mp == 0:
         num_mp = 2
     return num_mp
 
 @profile
-def create_mating_pool(population, rank_list):
+def create_mating_pool(population, rank_list, initial_call = True):
 
     # ensure the top10percent is an even num
     top10percent = get_top_10_percent(len(rank_list)) 
     
     # 40% of population to be selected for mating from roulette wheel
-    mp_rest = get_non_elite_percent(len(rank_list))
+    mp_rest = get_non_elite_percent(len(rank_list), initial_call)
 
     # store the top 10 percent of population in top10_ranked, rest stays in rank_list
     top10_ranked, rank_list = rank_list[:top10percent], rank_list[top10percent:]
@@ -117,7 +117,8 @@ def create_mating_pool(population, rank_list):
     # mating_pool is a list of paths, init with top10_ranked
     mating_pool = [population_dict[index] for (_, index) in top10_ranked]
 
-    parent_indices = roulette_wheel_selection(rank_list, mp_rest)
+    parent_indices = roulette_wheel_selection(rank_list, mp_rest) if initial_call else tournament_selection(rank_list, mp_rest)
+
     mating_pool += [population_dict[index] for index in parent_indices]
     return mating_pool
 
@@ -212,7 +213,7 @@ def mutate(path):
     return path
 
 @profile
-def two_opt(path, num_improvements = 200):
+def two_opt(path, num_improvements = 400):
     """Applies the 2-opt local optimization heuristic to improve a given path."""
     curr_path = path.copy()
     num_cities = len(path)
@@ -254,6 +255,12 @@ def make_super_child(parents_list, start_index, end_index):
         #children.append(two_opt(mutate(crossed)))
     if len(children) > 1 and len(children) % 2 == 1: 
         children.pop()
+    # have an even num of children, can try tournament sel
+    num_pop = len(children)
+    if num_pop > 16:
+        children = create_mating_pool(children, make_rank_list(children), False)
+        print("NUM CHILDREN BF AND AFTER CREATING MATING POOL: ", num_pop, len(children))
+
     return make_super_child(get_rand_pairs(children), start_index, end_index)
 
 def make_output(path):
