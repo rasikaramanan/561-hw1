@@ -154,8 +154,7 @@ def crossover(parent1, parent2):
     child.append(child[0])
     return child
 
-
-def two_opt(path, num_improvements = 300):
+def two_opt(path, num_improvements = 400):
     curr_path = np.array(path)  # convert to numpy once 
     len_path = len(curr_path)
     imprvmnts_made = 0
@@ -216,12 +215,6 @@ with open("input.txt", "r") as input:
 
 init_pop_size = 1000 if math.factorial(num_cities) >= 1000 else math.factorial(num_cities)
 print("INITIAL POPULATION SIZE: ", init_pop_size)
-
-# start 25% of the way through the array
-start_index = num_cities // 4 if num_cities > 3 else 1
-
-#end 75% of the way through the array
-end_index = start_index * 2 if num_cities < 5 else start_index * 3
 
 init_pop = create_init_population(init_pop_size, locations)
 
