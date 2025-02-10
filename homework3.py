@@ -182,7 +182,7 @@ def crossover(parent1, parent2):
     child.append(child[0])
     return child
 
-def two_opt(path, num_improvements = 400):
+def two_opt(path, num_improvements = 350):
     curr_path = np.array(path)  # convert to numpy once 
     len_path = len(curr_path)
     imprvmnts_made = 0
