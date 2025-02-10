@@ -190,30 +190,26 @@ def crossover(parent1, parent2, start, end):
 
 @profile
 def two_opt(path, num_improvements = 600):
-    """Applies the 2-opt local optimization heuristic to improve a given path."""
-    curr_path = path.copy()
-    num_cities = len(path)
-
+    curr_path = np.array(path)  # convert to numpy once 
+    len_path = len(curr_path)
     imprvmnts_made = 0
-    for segment_length in range(num_cities - 3, 1, -1):  # Start with largest swaps
-        for i in range(1, num_cities - segment_length - 1):  # Skip first and last city
+    for segment_length in range(len_path - 3, 1, -1):  # Start with largest swaps
+        for i in range(1, len_path - segment_length - 1):  # Skip first and last city
             j = i + segment_length 
 
-            if j >= num_cities - 1:  # Prevent out-of-bounds errors
+            if j >= len_path - 1:
                 break
 
-            prev_dist = np.linalg.norm(np.array(curr_path[i]) - np.array(curr_path[i-1])) + \
-                        np.linalg.norm(np.array(curr_path[j-1]) - np.array(curr_path[j]))
-            new_dist = np.linalg.norm(np.array(curr_path[j-1]) - np.array(curr_path[i-1])) + \
-                        np.linalg.norm(np.array(curr_path[i]) - np.array(curr_path[j]))
+            prev_dist = np.linalg.norm(curr_path[i] - curr_path[i-1]) + np.linalg.norm(curr_path[j-1] - curr_path[j])
+            new_dist = np.linalg.norm(curr_path[j-1] - curr_path[i-1]) + np.linalg.norm(curr_path[i] - curr_path[j])
             
             if new_dist < prev_dist:
                 curr_path[i:j] = curr_path[i:j][::-1]
                 imprvmnts_made += 1
-                break #for a given segment length, only do one successful swap
+
         if imprvmnts_made >= num_improvements:
             break
-    return curr_path
+    return curr_path.tolist() 
             
 @profile
 def make_super_child(parents_list, start_index, end_index):
