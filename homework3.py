@@ -1,10 +1,10 @@
 import random
 import math 
-import bisect
 import warnings 
 import numpy as np
 import time
 import functools
+import heapq
 
 # Dictionary to store function call counts and total execution time
 profile_data = {}
@@ -77,10 +77,10 @@ def calc_path_distance(path):
 @profile
 def make_rank_list(init_pop):
     rank_list = []
-    for index, path in enumerate(init_pop):
-        entry = (calc_path_distance(path), index)
-        # will automatically sort by entry's val at index 0
-        bisect.insort(rank_list, entry)
+    dists = np.array([calc_path_distance(path) for path in init_pop])
+    rank_list = heapq.nsmallest(len(init_pop), 
+                                ((dist, index) for index, dist in enumerate(dists)), 
+                                key=lambda x: x[0])
     return rank_list
 
 
